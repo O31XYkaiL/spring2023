@@ -1,0 +1,43 @@
+# Конфигурация для профиля "default"
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/database
+    username: lyelya
+    password: 12348765qwe
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+# Директория для загрузки файлов
+# file.upload-dir: uploads  потом подключу, сейчас бесполезный конфиг, проект не развернут
+
+# SMTP сервер для отправки почты
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: myemailexample@gmail.com
+  password: mypassword
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+
+# Конфигурация для профиля "test"
+test:
+  server:
+    port: 8081
+
+  spring:
+    datasource:
+      url: jdbc:mysql://localhost:3306/test_database
+      username: test_user
+      password: test_password

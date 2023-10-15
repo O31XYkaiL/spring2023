@@ -2,66 +2,32 @@ package com.webagregator.webagregator;
 
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
-import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
-
 import org.junit.jupiter.api.Test;
 
+import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
+
 public class ArchitectureTest {
-
-    private final JavaClasses classes = new ClassFileImporter().importPackages("com.webagregator.webagregator");
-
-    @Test
-    public void modelLayerShouldNotDependOnOtherLayers() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Model").definedBy("com.webagregator.webagregator.model..")
-                .whereLayer("Model").mayNotBeAccessedByAnyLayer();
-
-        rule.check(classes);
-    }
+    private static final String EXTERN_LAYER_PACKAGE = "your.package.extern";
+    private static final String APP_LAYER_PACKAGE = "your.package.app";
+    private static final String DOMAIN_LAYER_PACKAGE = "your.package.domain";
 
     @Test
-    public void repositoryLayerShouldOnlyDependOnModelLayer() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Repository").definedBy("com.webagregator.webagregator.repository..")
-                .whereLayer("Repository").mayOnlyBeAccessedByLayers("Model");
+    public void testLayeredArchitecture() {
+        JavaClasses importedClasses = new ClassFileImporter()
+                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                .importPackages("your.package");
 
-        rule.check(classes);
-    }
+        ArchRule layeredArchitecture = layeredArchitecture()
+                .consideringAllDependencies().layer("Extern").definedBy(EXTERN_LAYER_PACKAGE)
+                .layer("App").definedBy(APP_LAYER_PACKAGE)
+                .layer("Domain").definedBy(DOMAIN_LAYER_PACKAGE)
+                .whereLayer("Extern").mayOnlyBeAccessedByLayers("App", "Domain")
+                .whereLayer("App").mayOnlyBeAccessedByLayers("Domain")
+                .whereLayer("Domain").mayNotBeAccessedByAnyLayer();
 
-    @Test
-    public void infrastructureLayerShouldOnlyDependOnRepositoryAndSecurityLayers() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Infrastructure").definedBy("com.webagregator.webagregator.infrastructure..")
-                .whereLayer("Infrastructure").mayOnlyBeAccessedByLayers("Repository", "Security");
-
-        rule.check(classes);
-    }
-
-    @Test
-    public void serviceLayerShouldOnlyDependOnRepositoryAndInfrastructureLayers() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Service").definedBy("com.webagregator.webagregator.service..")
-                .whereLayer("Service").mayOnlyBeAccessedByLayers("Repository", "Infrastructure");
-
-        rule.check(classes);
-    }
-
-    @Test
-    public void controllerLayerShouldOnlyDependOnServiceAndSecurityLayers() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Controller").definedBy("com.webagregator.webagregator.controller..")
-                .whereLayer("Controller").mayOnlyBeAccessedByLayers("Service", "Security");
-
-        rule.check(classes);
-    }
-
-    @Test
-    public void securityLayerShouldOnlyDependOnServiceLayer() {
-        ArchRule rule = layeredArchitecture()
-                .consideringAllDependencies().layer("Security").definedBy("com.webagregator.webagregator.security..")
-                .whereLayer("Security").mayOnlyBeAccessedByLayers("Service");
-
-        rule.check(classes);
+        layeredArchitecture.check(importedClasses);
     }
 }
+
