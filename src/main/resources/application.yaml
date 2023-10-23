@@ -1,19 +1,26 @@
 # Конфигурация для профиля "default"
 server:
-  port: 8080
+  port: 9092
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/database
-    username: lyelya
-    password: 12348765qwe
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
+    url: jdbc:h2:tcp:default
+    driverClassName: org.h2.Driver
+    username: default
+    password: 1234
+  h2:
+    console:
+      enabled: true
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+      show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.DB2Dialect
+
+
 
 # Директория для загрузки файлов
 # file.upload-dir: uploads  потом подключу, сейчас бесполезный конфиг, проект не развернут
@@ -38,6 +45,16 @@ test:
 
   spring:
     datasource:
-      url: jdbc:mysql://localhost:3306/test_database
-      username: test_user
-      password: test_password
+      url: jdbc:h2:mem:testdb
+      driverClassName: org.h2.Driver
+      username: test
+      password: 1234
+    h2:
+      console:
+        enabled: true
+
+    jpa:
+      hibernate:
+        ddl-auto: update
+      properties:
+        hibernate.dialect: org.hibernate.dialect.H2Dialect

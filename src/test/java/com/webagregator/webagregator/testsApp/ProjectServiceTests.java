@@ -1,86 +1,85 @@
 package com.webagregator.webagregator.testsApp;
 
-import com.webagregator.webagregator.app.ProjectService;
+import com.webagregator.webagregator.app.repositories.ProjectRepository;
+import com.webagregator.webagregator.app.services.ProjectService;
 import com.webagregator.webagregator.domain.Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
 public class ProjectServiceTests {
 
-    @MockBean
-    private JdbcTemplate jdbcTemplate;
-
+    @InjectMocks
     private ProjectService projectService;
 
+    @Mock
+    private ProjectRepository projectRepository;
+
     @BeforeEach
-    void setUp() {
-        projectService = new ProjectService(jdbcTemplate);
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testGetProjectById() {
-        // Arrange
         Long projectId = 1L;
-        Project expectedProject = new Project();
-        expectedProject.setId(projectId);
-        expectedProject.setProjectName("Test Project");
+        Project project = new Project();
+        project.setId(projectId);
 
-        // Mocking jdbcTemplate behavior
-        when(jdbcTemplate.queryForObject(anyString(), eq(Project.class), any(Object[].class))).thenReturn(expectedProject);
+        Mockito.when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
-        // Act
-        Project actualProject = projectService.getProjectById(projectId);
+        Project result = projectService.getProjectById(projectId);
 
-        // Assert
-        assertEquals(expectedProject, actualProject);
+        assertNotNull(result);
+        assertEquals(projectId, result.getId());
+    }
+
+    @Test
+    public void testGetProjectById_WhenProjectNotFound() {
+        Long projectId = 1L;
+
+        Mockito.when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        Project result = projectService.getProjectById(projectId);
+
+        assertNull(result);
     }
 
     @Test
     public void testCreateProject() {
-        // Arrange
-        Project projectToCreate = new Project();
-        projectToCreate.setProjectName("New Project");
+        Project project = new Project();
 
-        // Act
-        projectService.createProject(projectToCreate);
+        Project result = projectService.createProject(project);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        assertNotNull(result);
+        Mockito.verify(projectRepository).save(project);
     }
 
     @Test
     public void testUpdateProject() {
-        // Arrange
-        Project projectToUpdate = new Project();
-        projectToUpdate.setId(1L);
-        projectToUpdate.setProjectName("Updated Project");
+        Project project = new Project();
 
-        // Act
-        projectService.updateProject(projectToUpdate);
+        Project result = projectService.updateProject(project);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        assertNotNull(result);
+        Mockito.verify(projectRepository).save(project);
     }
 
     @Test
     public void testDeleteProject() {
-        // Arrange
         Long projectId = 1L;
 
-        // Act
         projectService.deleteProject(projectId);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(projectRepository).deleteById(projectId);
     }
 }

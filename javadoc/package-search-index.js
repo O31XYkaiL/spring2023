@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.webagregator.webagregator"},{"l":"com.webagregator.webagregator.app.repositories"},{"l":"com.webagregator.webagregator.app.services"},{"l":"com.webagregator.webagregator.domain"},{"l":"com.webagregator.webagregator.testsApp"},{"l":"com.webagregator.webagregator.testsDomain"}];updateSearchResults();
