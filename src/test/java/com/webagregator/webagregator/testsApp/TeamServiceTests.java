@@ -1,72 +1,71 @@
 package com.webagregator.webagregator.testsApp;
 
-import com.webagregator.webagregator.app.TeamService;
+import com.webagregator.webagregator.app.repositories.TeamRepository;
 import com.webagregator.webagregator.domain.Team;
+import com.webagregator.webagregator.app.services.TeamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-@SpringBootTest
 public class TeamServiceTests {
 
-    @MockBean
-    private JdbcTemplate jdbcTemplate;
+    @Mock
+    private TeamRepository teamRepository;
 
     private TeamService teamService;
 
     @BeforeEach
-    void setUp() {
-        teamService = new TeamService(jdbcTemplate);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        teamService = new TeamService(teamRepository);
     }
 
     @Test
     public void testGetTeamById() {
-        Long teamId = 1L;
-        Team expectedTeam = new Team();
-        expectedTeam.setId(teamId);
-        expectedTeam.setTeamName("TestTeam");
+        Team mockTeam = new Team();
+        mockTeam.setId(1L);
+        mockTeam.setTeamName("Mock Team");
 
-        when(jdbcTemplate.queryForObject(anyString(), eq(Team.class), any(Object[].class))).thenReturn(expectedTeam);
+        Mockito.when(teamRepository.findById(1L)).thenReturn(Optional.of(mockTeam));
 
-        Team actualTeam = teamService.getTeamById(teamId);
+        Team result = teamService.getTeamById(1L);
 
-        assertEquals(expectedTeam, actualTeam);
+        assertEquals(mockTeam, result);
     }
 
     @Test
     public void testCreateTeam() {
-        Team teamToCreate = new Team();
-        teamToCreate.setTeamName("NewTeam");
+        Team newTeam = new Team();
+        newTeam.setId(2L);
+        newTeam.setTeamName("New Team");
 
-        teamService.createTeam(teamToCreate);
+        teamService.createTeam(newTeam);
 
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(teamRepository).save(newTeam);
     }
 
     @Test
     public void testUpdateTeam() {
-        Team teamToUpdate = new Team();
-        teamToUpdate.setId(1L);
-        teamToUpdate.setTeamName("UpdatedTeam");
+        Team existingTeam = new Team();
+        existingTeam.setId(3L);
+        existingTeam.setTeamName("Existing Team");
 
-        teamService.updateTeam(teamToUpdate);
+        Mockito.when(teamRepository.save(existingTeam)).thenReturn(existingTeam);
 
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        teamService.updateTeam(existingTeam);
+
+        Mockito.verify(teamRepository).save(existingTeam);
     }
 
     @Test
     public void testDeleteTeam() {
-        Long teamId = 1L;
+        teamService.deleteTeam(4L);
 
-        teamService.deleteTeam(teamId);
-
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(teamRepository).deleteById(4L);
     }
 }

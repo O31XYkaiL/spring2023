@@ -1,85 +1,81 @@
 package com.webagregator.webagregator.testsApp;
 
-import com.webagregator.webagregator.app.AdminService;
+import com.webagregator.webagregator.app.repositories.AdminRepository;
+import com.webagregator.webagregator.app.services.AdminService;
 import com.webagregator.webagregator.domain.Admin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@SpringBootTest
 public class AdminServiceTests {
 
-    @MockBean
-    private JdbcTemplate jdbcTemplate;
-
+    @InjectMocks
     private AdminService adminService;
 
+    @Mock
+    private AdminRepository adminRepository;
+
     @BeforeEach
-    void setUp() {
-        adminService = new AdminService(jdbcTemplate);
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testGetAdminById() {
-        // Arrange
         Long adminId = 1L;
-        Admin expectedAdmin = new Admin();
-        expectedAdmin.setId(adminId);
-        expectedAdmin.setUsername("TestAdmin");
+        Admin admin = new Admin();
+        admin.setId(adminId);
 
-        // Mocking jdbcTemplate behavior
-        when(jdbcTemplate.queryForObject(anyString(), eq(Admin.class), any(Object[].class))).thenReturn(expectedAdmin);
+        Mockito.when(adminRepository.findById(adminId)).thenReturn(java.util.Optional.of(admin));
 
-        // Act
-        Admin actualAdmin = adminService.getAdminById(adminId);
+        Admin result = adminService.getAdminById(adminId);
 
-        // Assert
-        assertEquals(expectedAdmin, actualAdmin);
+        assertNotNull(result);
+        assertEquals(adminId, result.getId());
+    }
+
+    @Test
+    public void testGetAdminById_WhenAdminNotFound() {
+        Long adminId = 1L;
+
+        Mockito.when(adminRepository.findById(adminId)).thenReturn(java.util.Optional.empty());
+
+        Admin result = adminService.getAdminById(adminId);
+
+        assertNull(result);
     }
 
     @Test
     public void testCreateAdmin() {
-        // Arrange
-        Admin adminToCreate = new Admin();
-        adminToCreate.setUsername("NewAdmin");
+        Admin admin = new Admin();
 
-        // Act
-        adminService.createAdmin(adminToCreate);
+        adminService.createAdmin(admin);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(adminRepository).save(admin);
     }
 
     @Test
     public void testUpdateAdmin() {
-        // Arrange
-        Admin adminToUpdate = new Admin();
-        adminToUpdate.setId(1L);
-        adminToUpdate.setUsername("UpdatedAdmin");
+        Admin admin = new Admin();
 
-        // Act
-        adminService.updateAdmin(adminToUpdate);
+        adminService.updateAdmin(admin);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(adminRepository).save(admin);
     }
 
     @Test
     public void testDeleteAdmin() {
-        // Arrange
         Long adminId = 1L;
 
-        // Act
         adminService.deleteAdmin(adminId);
 
-        // Assert
-        verify(jdbcTemplate, times(1)).update(anyString(), any(Object[].class));
+        Mockito.verify(adminRepository).deleteById(adminId);
     }
 }

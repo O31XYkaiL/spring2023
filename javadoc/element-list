@@ -1,0 +1,6 @@
+com.webagregator.webagregator
+com.webagregator.webagregator.app.repositories
+com.webagregator.webagregator.app.services
+com.webagregator.webagregator.domain
+com.webagregator.webagregator.testsApp
+com.webagregator.webagregator.testsDomain
