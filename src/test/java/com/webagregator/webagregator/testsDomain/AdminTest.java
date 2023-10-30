@@ -1,25 +1,49 @@
-package com.webagregator.webagregator.testsDomain;
+package com.webagregator.webagregator.domain;
 
-import com.webagregator.webagregator.domain.Admin;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AdminTest {
 
-    private Admin admin;
+    @Test
+    public void testAdminId() {
+        Admin admin = new Admin();
+        admin.setId(1L);
 
-    @BeforeEach
-    void setUp() {
-        admin = new Admin();
+        assertEquals(1L, admin.getId());
     }
 
     @Test
-    void testAdminSetterGetter() {
-        admin.setUsername("adminuser");
-        admin.setPassword("adminpass");
+    public void testAdminUsername() {
+        Admin admin = new Admin();
+        admin.setUsername("adminUser");
 
-        assertEquals("adminuser", admin.getUsername());
-        assertEquals("adminpass", admin.getPassword());
+        assertEquals("adminUser", admin.getUsername());
+    }
+
+    @Test
+    public void testAdminPassword() {
+        Admin admin = new Admin();
+        admin.setPassword("adminPass");
+
+        assertEquals("adminPass", admin.getPassword());
+    }
+
+    @Test
+    public void testProjectsForReview() {
+        Admin admin = new Admin();
+        Project project1 = new Project();
+        Project project2 = new Project();
+
+        admin.setProjectsForReview(List.of(project1, project2));
+
+        List<Project> projects = admin.getProjectsForReview();
+
+        assertNotNull(projects);
+        assertEquals(2, projects.size());
+        assertTrue(projects.contains(project1));
+        assertTrue(projects.contains(project2));
     }
 }

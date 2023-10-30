@@ -4,19 +4,56 @@ import lombok.*;
 
 @Data
 public class Project {
-    private Long id; //id проекта
-    private String projectName; //название проекта
-    private String projectDescription; //описание проекта
-    private String howToPlay; //описание как играть
-    private String coverImage; //обложка проекта
-    private String gameplayVideo; //видео геймплея проекта
-    private String projectCategory; //категория проекта
-    private String projectTheme; //тема проекта
-    private String repositoryLink; //ссылка на гит
-    private byte[] projectArchive; //архив с проектом, который должен проигрываться в браузере
-
-    // позже добавлю поля для связей с другими сущностями студент/админ/тима
-
-    // доп геттеры и сеттеры связей ?????????
+    /**
+     * ID проекта
+     */
+    private Long id;
+    /**
+     * Название проекта
+     */
+    private String projectName;
+    /**
+     * Описание проекта
+     */
+    private String projectDescription;
+    /**
+     * Описание "как играть"
+     */
+    private String howToPlay;
+    /**
+     * Обложка проекта
+     */
+    private String coverImage;
+    /**
+     * Видео геймплея проекта
+     */
+    private String gameplayVideo;
+    /**
+     * Категория проекта
+     */
+    private String projectCategory;
+    /**
+     * Тема проекта
+     */
+    private String projectTheme;
+    /**
+     * Ссылка на репозиторий проекта
+     */
+    private String repositoryLink;
+    /**
+     * Архив с проектом, который должен проигрываться в браузере
+     */
+    private byte[] projectArchive;
+    /**
+     * Студент-создатель проекта (связь с сущностью Student)
+     */
+    private Student creator;
+    /**
+     * Администратор, проводящий модерацию
+     */
+    private Admin moderator;
+    /**
+     * Количество голосов, полученных за время голосования
+     */
+    private int voteCount;
 }
-

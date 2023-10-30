@@ -4,10 +4,36 @@ import lombok.*;
 
 @Data
 public class Student {
-    private Long id; //id студента
-    private String email; //урфушная(!) почта
-    private String password; //пароль
-    private String firstName; //имя
-    private String lastName; //фамилия
-    private String academicGroup; //академ группа
+    /**
+     * ID студента
+     */
+    private Long id;
+    /**
+     * Урфушная(!) почта
+     */
+    private String email;
+    /**
+     * Пароль
+     */
+    private String password;
+    /**
+     * Имя
+     */
+    private String firstName;
+    /**
+     * Фамилия
+     */
+    private String lastName;
+    /**
+     * Академическая группа
+     */
+    private String academicGroup;
+    /**
+     * Количество голосов у студента
+     */
+    private int voteCount;
+    /**
+     * Роль студента в команде
+     */
+    private String roleInProject;
 }
