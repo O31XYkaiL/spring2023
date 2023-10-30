@@ -1,5 +1,7 @@
-package com.webagregator.webagregator.domain;
+package com.webagregator.webagregator.testsDomain;
 
+import com.webagregator.webagregator.domain.Admin;
+import com.webagregator.webagregator.domain.Project;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 
