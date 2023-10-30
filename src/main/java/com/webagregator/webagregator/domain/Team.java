@@ -1,16 +1,32 @@
 package com.webagregator.webagregator.domain;
 
+import jakarta.persistence.OneToMany;
 import lombok.*;
+
+import java.util.List;
 
 @Data
 public class Team {
-    private Long id; //id тимы
-    private String teamName; //название тимы
-    private String teamDescription; //описание тимы
-    private Long teamLeaderId; //id студента-тимлида
-
-    // позже добавлю поля для связей с другими сущностями студент/проект
-
-    // доп геттеры и сеттеры связей ?????????
-
+    /**
+     * ID тимы
+     */
+    private Long id;
+    /**
+     * Название тимы
+     */
+    private String teamName;
+    /**
+     * Описание тимы
+     */
+    private String teamDescription;
+    /**
+     * Студент-тимлид
+     */
+    private Student teamLeader;
+    /**
+     * Список студентов, являющихся членами данной команды.
+     */
+    @Getter
+    @OneToMany(mappedBy = "team")
+    private List<Student> teamMembers;
 }

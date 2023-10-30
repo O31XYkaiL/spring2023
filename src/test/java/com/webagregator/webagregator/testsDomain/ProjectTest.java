@@ -1,35 +1,120 @@
 package com.webagregator.webagregator.testsDomain;
 
+import com.webagregator.webagregator.domain.Admin;
 import com.webagregator.webagregator.domain.Project;
-import org.junit.jupiter.api.BeforeEach;
+import com.webagregator.webagregator.domain.Student;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProjectTest {
-    private Project project;
-    @BeforeEach
-    void setUp() {
-        project = new Project();
+
+    @Test
+    public void testProjectId() {
+        Project project = new Project();
+        project.setId(1L);
+
+        assertEquals(1L, project.getId());
     }
 
     @Test
-    void testProjectSetterGetter() {
+    public void testProjectName() {
+        Project project = new Project();
         project.setProjectName("Test Project");
-        project.setProjectDescription("This is a test project.");
-        project.setHowToPlay("Instructions for playing.");
-        project.setCoverImage("cover.jpg");
-        project.setGameplayVideo("video.mp4");
-        project.setProjectCategory("Game");
-        project.setProjectTheme("Adventure");
-        project.setRepositoryLink("https://github.com/test/test-project");
 
         assertEquals("Test Project", project.getProjectName());
-        assertEquals("This is a test project.", project.getProjectDescription());
-        assertEquals("Instructions for playing.", project.getHowToPlay());
+    }
+
+    @Test
+    public void testProjectDescription() {
+        Project project = new Project();
+        project.setProjectDescription("Description of the project");
+
+        assertEquals("Description of the project", project.getProjectDescription());
+    }
+
+    @Test
+    public void testHowToPlay() {
+        Project project = new Project();
+        project.setHowToPlay("Instructions on how to play the project");
+
+        assertEquals("Instructions on how to play the project", project.getHowToPlay());
+    }
+
+    @Test
+    public void testCoverImage() {
+        Project project = new Project();
+        project.setCoverImage("cover.jpg");
+
         assertEquals("cover.jpg", project.getCoverImage());
-        assertEquals("video.mp4", project.getGameplayVideo());
-        assertEquals("Game", project.getProjectCategory());
-        assertEquals("Adventure", project.getProjectTheme());
-        assertEquals("https://github.com/test/test-project", project.getRepositoryLink());
+    }
+
+    @Test
+    public void testGameplayVideo() {
+        Project project = new Project();
+        project.setGameplayVideo("gameplay.mp4");
+
+        assertEquals("gameplay.mp4", project.getGameplayVideo());
+    }
+
+    @Test
+    public void testProjectCategory() {
+        Project project = new Project();
+        project.setProjectCategory("Action");
+
+        assertEquals("Action", project.getProjectCategory());
+    }
+
+    @Test
+    public void testProjectTheme() {
+        Project project = new Project();
+        project.setProjectTheme("Sci-Fi");
+
+        assertEquals("Sci-Fi", project.getProjectTheme());
+    }
+
+    @Test
+    public void testRepositoryLink() {
+        Project project = new Project();
+        project.setRepositoryLink("https://github.com/user/project");
+
+        assertEquals("https://github.com/user/project", project.getRepositoryLink());
+    }
+
+    @Test
+    public void testProjectArchive() {
+        Project project = new Project();
+        byte[] archive = new byte[]{1, 2, 3};
+        project.setProjectArchive(archive);
+
+        assertArrayEquals(archive, project.getProjectArchive());
+    }
+
+    @Test
+    public void testCreator() {
+        Project project = new Project();
+        Student student = new Student();
+        student.setId(1L);
+        project.setCreator(student);
+
+        assertEquals(1L, project.getCreator().getId());
+    }
+
+    @Test
+    public void testModerator() {
+        Project project = new Project();
+        Admin admin = new Admin();
+        admin.setId(1L);
+        project.setModerator(admin);
+
+        assertEquals(1L, project.getModerator().getId());
+    }
+
+    @Test
+    public void testVoteCount() {
+        Project project = new Project();
+        project.setVoteCount(10);
+
+        assertEquals(10, project.getVoteCount());
     }
 }
