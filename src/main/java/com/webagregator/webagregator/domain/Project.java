@@ -1,5 +1,6 @@
 package com.webagregator.webagregator.domain;
 
+import jakarta.persistence.Lob;
 import lombok.*;
 
 @Data
@@ -33,6 +34,10 @@ public class Project {
      */
     private String projectCategory;
     /**
+     * Подкатегория проекта
+     */
+    private String projectSubcategory;
+    /**
      * Тема проекта
      */
     private String projectTheme;
@@ -43,6 +48,7 @@ public class Project {
     /**
      * Архив с проектом, который должен проигрываться в браузере
      */
+    @Lob
     private byte[] projectArchive;
     /**
      * Студент-создатель проекта (связь с сущностью Student)

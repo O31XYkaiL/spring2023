@@ -12,6 +12,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -152,5 +154,46 @@ public class ProjectServiceTests {
         assertEquals("Updated Project", result.getProjectName());
         assertEquals("Updated Description", result.getProjectDescription());
         Mockito.verify(projectRepository).save(project);
+    }
+    @Test
+    public void testFilterProjectsByCategoryAndSubcategory() {
+        String category = "CategoryName";
+        String subcategory = "SubcategoryName";
+
+        Project project1 = new Project();
+        project1.setProjectCategory(category);
+        project1.setProjectSubcategory(subcategory);
+
+        Project project2 = new Project();
+        project2.setProjectCategory(category);
+        project2.setProjectSubcategory("OtherSubcategory");
+
+        List<Project> projects = List.of(project1, project2);
+
+        Mockito.when(projectRepository.findByCategoryAndSubcategory(category, subcategory)).thenReturn(projects);
+
+        List<Project> result = projectService.filterProjectsByCategoryAndSubcategory(category, subcategory);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(project1, result.get(0));
+    }
+
+
+    @Test
+    public void testUploadProjectArchive() {
+        Long projectId = 1L;
+        byte[] archiveData = new byte[] { 1, 2, 3, 4 };
+
+        Project project = new Project();
+        project.setId(projectId);
+
+        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+        Mockito.when(projectRepository.save(project)).thenReturn(project);
+
+        Project result = projectService.uploadProjectArchive(projectId, archiveData);
+
+        assertNotNull(result);
+        assertEquals(archiveData, result.getProjectArchive());
     }
 }
