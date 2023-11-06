@@ -4,26 +4,19 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:tcp:default
-    driverClassName: org.h2.Driver
-    username: default
-    password: 1234
-  h2:
-    console:
-      enabled: true
+    url: jdbc:sqlite:C:\Users\koziy\IdeaProjects\spring2023\webagregator.sqlite
+    driverClassName: org.sqlite.JDBC
+    username:
+    password:
   jpa:
+    database-platform: org.hibernate.dialect.SQLiteDialect
     hibernate:
       ddl-auto: update
       show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.DB2Dialect
-
 
 
 # Директория для загрузки файлов
-# file.upload-dir: uploads  потом подключу, сейчас бесполезный конфиг, проект не развернут
+# file.upload-dir: uploads потом подключу, сейчас бесполезный конфиг, проект не развернут
 
 # SMTP сервер для отправки почты
 mail:

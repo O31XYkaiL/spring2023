@@ -7,6 +7,11 @@ import com.webagregator.webagregator.domain.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -102,4 +107,39 @@ public class ProjectService {
         return project;
     }
 
+    /**
+     * Метод, который позволит нам получить категорию и подкатегорию проекта
+     *
+     * @param category Категория проекта.
+     * @param subcategory Подкатегория проекта.
+     * @return Список проектов, соответствующих заданным категории и подкатегории.
+     */
+    public List<Project> filterProjectsByCategoryAndSubcategory(String category, String subcategory) {
+        log.info("Filtering projects by category and subcategory: {}, {}", category, subcategory);
+        return projectRepository.findByCategoryAndSubcategory(category, subcategory);
+    }
+
+    /**
+     * Загрузить архив проекта в базу данных.
+     *
+     * @param projectId ID проекта, в который загружается архив.
+     * @param archiveData Данные архива в виде массива байт.
+     * @return Обновленный объект проекта или null в случае ошибки.
+     */
+    public Project uploadProjectArchive(Long projectId, byte[] archiveData) {
+        Project project = projectRepository.findById(projectId).orElse(null);
+
+        if (project != null) {
+            try {
+                project.setProjectArchive(archiveData);
+                projectRepository.save(project);
+                log.info("Uploaded archive for project with ID: {}", projectId);
+                return project;
+            } catch (Exception e) {
+                log.error("Error while uploading project archive: {}", e.getMessage());
+            }
+        }
+
+        return null;
+    }
 }

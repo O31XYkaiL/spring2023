@@ -58,14 +58,6 @@ public class ProjectTest {
     }
 
     @Test
-    public void testProjectCategory() {
-        Project project = new Project();
-        project.setProjectCategory("Action");
-
-        assertEquals("Action", project.getProjectCategory());
-    }
-
-    @Test
     public void testProjectTheme() {
         Project project = new Project();
         project.setProjectTheme("Sci-Fi");
@@ -116,5 +108,20 @@ public class ProjectTest {
         project.setVoteCount(10);
 
         assertEquals(10, project.getVoteCount());
+    }
+    @Test
+    public void testProjectCategory() {
+        Project project = new Project();
+        String projectCategory = "Category A";
+        project.setProjectCategory(projectCategory);
+        assertEquals(projectCategory, project.getProjectCategory());
+    }
+
+    @Test
+    public void testProjectSubcategory() {
+        Project project = new Project();
+        String projectSubcategory = "Subcategory B";
+        project.setProjectSubcategory(projectSubcategory);
+        assertEquals(projectSubcategory, project.getProjectSubcategory());
     }
 }

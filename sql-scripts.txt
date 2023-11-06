@@ -1,0 +1,86 @@
+CREATE TABLE Admin (
+                       id INTEGER PRIMARY KEY,
+                       username TEXT NOT NULL,
+                       password TEXT NOT NULL
+);
+
+CREATE TABLE Students (
+                          id INTEGER PRIMARY KEY AUTOINCREMENT,
+                          email TEXT NOT NULL,
+                          password TEXT NOT NULL,
+                          firstName TEXT,
+                          lastName TEXT,
+                          academicGroup TEXT,
+                          voteCount INTEGER,
+                          roleInProject TEXT
+);
+
+CREATE TABLE Teams (
+                       id INTEGER PRIMARY KEY,
+                       teamName TEXT,
+                       teamDescription TEXT,
+                       teamLeader_id INTEGER,
+                       FOREIGN KEY (teamLeader_id) REFERENCES Students(id)
+);
+
+CREATE TABLE IF NOT EXISTS Categories (
+                                          categoryID INTEGER PRIMARY KEY,
+                                          categoryName TEXT NOT NULL
+);
+
+INSERT INTO Categories (categoryName) VALUES ('Образовательные игры');
+INSERT INTO Categories (categoryName) VALUES ('Симуляторы');
+INSERT INTO Categories (categoryName) VALUES ('Развлекательные');
+INSERT INTO Categories (categoryName) VALUES ('Другие проекты');
+
+CREATE TABLE IF NOT EXISTS Subcategories (
+                                             subcategoryID INTEGER PRIMARY KEY,
+                                             subcategoryName TEXT NOT NULL,
+                                             categoryID INTEGER NOT NULL,
+                                             FOREIGN KEY (categoryID) REFERENCES Categories(categoryID)
+);
+-- Добавление подкатегорий для категории "Образовательные игры" (ID: 1)
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Математика', 1);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Медицина', 1);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Другое', 1);
+
+-- Добавление подкатегорий для категории "Симуляторы" (ID: 2)
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Физика', 2);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Сопромат', 2);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Биомеханика', 2);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Другое', 2);
+
+-- Добавление подкатегорий для категории "Развлекательные" (ID: 3)
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Аркады', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Боевики', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Головоломки', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Казуальные', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Карточные', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Мидкорные', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Ролевые', 3);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Другие', 3);
+
+-- Добавление подкатегорий для категории "Другие проекты" (ID: 4)
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Приложения', 4);
+INSERT INTO Subcategories (subcategoryName, categoryID) VALUES ('Другие', 4);
+
+
+CREATE TABLE NewProjects (
+                             id INTEGER PRIMARY KEY AUTOINCREMENT,
+                             projectName TEXT NOT NULL,
+                             projectDescription TEXT,
+                             howToPlay TEXT,
+                             coverImage TEXT,
+                             gameplayVideo TEXT,
+                             categoryID INTEGER,
+                             subcategoryID INTEGER,
+                             repositoryLink TEXT,
+                             projectArchive BLOB,
+                             creator_id INTEGER,
+                             moderator_id INTEGER,
+                             voteCount INTEGER,
+                             FOREIGN KEY (categoryID) REFERENCES Categories(categoryID),
+                             FOREIGN KEY (subcategoryID) REFERENCES Subcategories(subcategoryID),
+                             FOREIGN KEY (creator_id) REFERENCES Students(id),
+                             FOREIGN KEY (moderator_id) REFERENCES Admin(id)
+);
