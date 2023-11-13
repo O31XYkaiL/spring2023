@@ -107,46 +107,4 @@ public class StudentServiceTests {
 
         assertEquals(0, result);
     }
-
-    @Test
-    public void testVoteForProject() {
-        Long studentId = 1L;
-        Long projectId = 2L;
-        Student student = new Student();
-        student.setVoteCount(5);
-
-        Mockito.when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
-        Mockito.doNothing().when(projectService).increaseVoteCount(projectId, 1);
-
-        boolean result = studentService.voteForProject(studentId, projectId);
-
-        assertTrue(result);
-        assertEquals(4, student.getVoteCount());
-    }
-
-    @Test
-    public void testVoteForProject_WhenStudentNotFound() {
-        Long studentId = 1L;
-        Long projectId = 2L;
-
-        Mockito.when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.empty());
-
-        boolean result = studentService.voteForProject(studentId, projectId);
-
-        assertFalse(result);
-    }
-
-    @Test
-    public void testVoteForProject_WhenNotEnoughVotes() {
-        Long studentId = 1L;
-        Long projectId = 2L;
-        Student student = new Student();
-        student.setVoteCount(0);
-
-        Mockito.when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
-
-        boolean result = studentService.voteForProject(studentId, projectId);
-
-        assertFalse(result);
-    }
 }

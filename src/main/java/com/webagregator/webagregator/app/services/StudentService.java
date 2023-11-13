@@ -2,7 +2,6 @@ package com.webagregator.webagregator.app.services;
 
 import com.webagregator.webagregator.app.repositories.ProjectRepository;
 import com.webagregator.webagregator.app.repositories.StudentRepository;
-import com.webagregator.webagregator.domain.Project;
 import com.webagregator.webagregator.domain.Student;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,27 +73,5 @@ public class StudentService {
         }
 
         return student.getVoteCount();
-    }
-
-    /**
-     * Проголосовать за проект.
-     *
-     * @param studentId ID студента, который голосует.
-     * @param projectId ID проекта, за который голосуют.
-     * @return true, если голосование успешно, иначе false.
-     */
-    public boolean voteForProject(Long studentId, Long projectId) {
-        Student student = studentRepository.findById(studentId).orElse(null);
-        if (student == null || student.getVoteCount() <= 0) {
-            return false;
-        }
-
-        int updatedVoteCount = student.getVoteCount() - 1;
-        student.setVoteCount(updatedVoteCount);
-        studentRepository.save(student);
-
-        projectService.increaseVoteCount(projectId, 1);
-
-        return true;
     }
 }

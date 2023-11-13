@@ -2,6 +2,9 @@ package com.webagregator.webagregator.domain;
 
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class Student {
     /**
@@ -35,5 +38,16 @@ public class Student {
     /**
      * Роль студента в команде
      */
-    private String roleInProject;
+    private ProjectRole roleInProject;
+    /**
+     * Проекты, за которые проголосовал студент
+     */
+    List<Project> votedProjects;
+
+    /**
+     * Инициализация списка
+     */
+    public Student() {
+        this.votedProjects = new ArrayList<>();
+    }
 }

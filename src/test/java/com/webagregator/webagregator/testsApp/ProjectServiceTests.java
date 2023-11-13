@@ -11,12 +11,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ProjectServiceTests {
 
@@ -40,7 +44,7 @@ public class ProjectServiceTests {
         Project project = new Project();
         project.setId(projectId);
 
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
 
         Project result = projectService.getProjectById(projectId);
 
@@ -52,7 +56,7 @@ public class ProjectServiceTests {
     public void testGetProjectById_WhenProjectNotFound() {
         Long projectId = 1L;
 
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.empty());
 
         Project result = projectService.getProjectById(projectId);
 
@@ -87,23 +91,6 @@ public class ProjectServiceTests {
     }
 
     @Test
-    public void testIncreaseVoteCount() {
-        Long projectId = 1L;
-        int voteCount = 5;
-
-        Project project = new Project();
-        project.setId(projectId);
-        project.setVoteCount(10);
-
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
-
-        projectService.increaseVoteCount(projectId, voteCount);
-
-        assertEquals(15, project.getVoteCount());
-        Mockito.verify(projectRepository).save(project);
-    }
-
-    @Test
     public void testEditProjectByTeamLeader_WhenStudentIsNotTeamLeader() {
         Long studentId = 1L;
         Long projectId = 2L;
@@ -116,8 +103,8 @@ public class ProjectServiceTests {
         project.setId(projectId);
         project.setCreator(student);
 
-        Mockito.when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+        when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
 
         Project updatedProject = new Project();
         updatedProject.setProjectName("Updated Project");
@@ -141,8 +128,8 @@ public class ProjectServiceTests {
         project.setId(projectId);
         project.setCreator(student);
 
-        Mockito.when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+        when(studentRepository.findById(studentId)).thenReturn(java.util.Optional.of(student));
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
 
         Project updatedProject = new Project();
         updatedProject.setProjectName("Updated Project");
@@ -155,6 +142,8 @@ public class ProjectServiceTests {
         assertEquals("Updated Description", result.getProjectDescription());
         Mockito.verify(projectRepository).save(project);
     }
+
+    //тест действительно не работал, он был неверным
     @Test
     public void testFilterProjectsByCategoryAndSubcategory() {
         String category = "CategoryName";
@@ -170,7 +159,7 @@ public class ProjectServiceTests {
 
         List<Project> projects = List.of(project1, project2);
 
-        Mockito.when(projectRepository.findByCategoryAndSubcategory(category, subcategory)).thenReturn(projects);
+        when(projectRepository.findByCategoryAndSubcategory(category, subcategory)).thenReturn(Collections.singletonList(project1));
 
         List<Project> result = projectService.filterProjectsByCategoryAndSubcategory(category, subcategory);
 
@@ -179,21 +168,52 @@ public class ProjectServiceTests {
         assertEquals(project1, result.get(0));
     }
 
-
     @Test
-    public void testUploadProjectArchive() {
+    void testUploadProjectArchive() {
+        ProjectRepository projectRepository = mock(ProjectRepository.class);
+        ProjectService projectService = new ProjectService(projectRepository, studentRepository);
+
         Long projectId = 1L;
-        byte[] archiveData = new byte[] { 1, 2, 3, 4 };
+        byte[] archiveData = {1, 2, 3, 4};
+        Resource resource = new ByteArrayResource(archiveData);
 
         Project project = new Project();
-        project.setId(projectId);
+        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
+        when(projectRepository.save(project)).thenReturn(project);
 
-        Mockito.when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
-        Mockito.when(projectRepository.save(project)).thenReturn(project);
-
-        Project result = projectService.uploadProjectArchive(projectId, archiveData);
+        Project result = projectService.uploadProjectArchive(projectId, resource);
 
         assertNotNull(result);
-        assertEquals(archiveData, result.getProjectArchive());
+        byte[] resultData = new byte[archiveData.length];
+        try {
+            result.getProjectArchive().getInputStream().read(resultData);
+        } catch (Exception e) {
+            fail("Error reading the project archive");
+        }
+        assertArrayEquals(archiveData, resultData);
+    }
+
+    @Test
+    public void testVoteForProject_SuccessfulVote() {
+
+        Student student = new Student();
+        student.setId(1L);
+        student.setVoteCount(15);
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setVoteCount(0);
+
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(student));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        boolean result = projectService.voteForProject(1L, 1L);
+
+        assertTrue(result);
+
+        assertEquals(10, student.getVoteCount());
+        assertEquals(5, project.getVoteCount());
+        assertEquals(1, student.getVotedProjects().size());
+        assertEquals(1, project.getVoters().size());
     }
 }

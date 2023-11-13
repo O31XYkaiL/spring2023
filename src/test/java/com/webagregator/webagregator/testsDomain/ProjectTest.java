@@ -4,6 +4,11 @@ import com.webagregator.webagregator.domain.Admin;
 import com.webagregator.webagregator.domain.Project;
 import com.webagregator.webagregator.domain.Student;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,11 +80,27 @@ public class ProjectTest {
 
     @Test
     public void testProjectArchive() {
-        Project project = new Project();
-        byte[] archive = new byte[]{1, 2, 3};
-        project.setProjectArchive(archive);
+        byte[] archiveBytes = new byte[]{1, 2, 3};
+        Resource archiveResource = new ByteArrayResource(archiveBytes);
 
-        assertArrayEquals(archive, project.getProjectArchive());
+        Project project = new Project();
+        project.setProjectArchive(archiveResource);
+
+        assertNotNull(project.getProjectArchive());
+        byte[] readData = readBytesFromResource(project.getProjectArchive());
+
+        assertArrayEquals(archiveBytes, readData);
+    }
+
+    //я догадываюсь, что в тестовых классах не должно лежать ничего, кроме тестов, я пока не разобралась с разархивацией до конца
+    private byte[] readBytesFromResource(Resource resource) {
+        byte[] data = null;
+        try {
+            data = FileCopyUtils.copyToByteArray(resource.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
     }
 
     @Test

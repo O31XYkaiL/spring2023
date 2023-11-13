@@ -2,6 +2,10 @@ package com.webagregator.webagregator.domain;
 
 import jakarta.persistence.Lob;
 import lombok.*;
+import org.springframework.core.io.Resource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Project {
@@ -49,7 +53,7 @@ public class Project {
      * Архив с проектом, который должен проигрываться в браузере
      */
     @Lob
-    private byte[] projectArchive;
+    private Resource projectArchive;
     /**
      * Студент-создатель проекта (связь с сущностью Student)
      */
@@ -62,4 +66,14 @@ public class Project {
      * Количество голосов, полученных за время голосования
      */
     private int voteCount;
+    /**
+     * Студенты, которые проголосовали за проект
+     */
+    List<Student> voters;
+    /**
+     * Инициализация проголосовавших
+     */
+    public Project() {
+        this.voters = new ArrayList<>();
+    }
 }

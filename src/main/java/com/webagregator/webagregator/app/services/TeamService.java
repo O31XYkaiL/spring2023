@@ -2,6 +2,7 @@ package com.webagregator.webagregator.app.services;
 
 import com.webagregator.webagregator.app.repositories.StudentRepository;
 import com.webagregator.webagregator.app.repositories.TeamRepository;
+import com.webagregator.webagregator.domain.ProjectRole;
 import com.webagregator.webagregator.domain.Student;
 import com.webagregator.webagregator.domain.Team;
 import lombok.extern.slf4j.Slf4j;
@@ -85,22 +86,22 @@ public class TeamService {
     public Team addStudentToTeamWithRole(Long teamId, String lastName, String firstName, String role) {
         Team team = teamRepository.findById(teamId).orElse(null);
 
-        if (team == null || !"Team Leader".equalsIgnoreCase(team.getTeamLeader().getRoleInProject())) {
-            return null; // Команда не найдена или тимлид не имеет права добавлять студентов.
+        if (team == null || !ProjectRole.TEAM_LEAD.equals(team.getTeamLeader().getRoleInProject())) {
+            return null;
         }
 
         Student studentToAdd = studentRepository.findStudentByLastNameAndFirstName(lastName, firstName);
-        if (studentToAdd == null || "Team Leader".equalsIgnoreCase(studentToAdd.getRoleInProject())) {
-            return null; // Студент не найден или является тимлидом.
+        if (studentToAdd == null || ProjectRole.TEAM_LEAD.equals(studentToAdd.getRoleInProject())) {
+
+            return null;
         }
 
         team.getTeamMembers().add(studentToAdd);
-        studentToAdd.setRoleInProject(role);
+        studentToAdd.setRoleInProject(ProjectRole.valueOf(role));
 
         teamRepository.save(team);
         studentRepository.save(studentToAdd);
 
         return team;
     }
-
 }

@@ -3,14 +3,11 @@ package com.webagregator.webagregator.app.services;
 import com.webagregator.webagregator.app.repositories.ProjectRepository;
 import com.webagregator.webagregator.app.repositories.StudentRepository;
 import com.webagregator.webagregator.domain.Project;
+import com.webagregator.webagregator.domain.ProjectRole;
 import com.webagregator.webagregator.domain.Student;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -19,7 +16,6 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final StudentRepository studentRepository;
 
-    @Autowired
     public ProjectService(ProjectRepository projectRepository, StudentRepository studentRepository) {
         this.projectRepository = projectRepository;
         this.studentRepository = studentRepository;
@@ -66,21 +62,6 @@ public class ProjectService {
         projectRepository.deleteById(id);
     }
     /**
-     * Увеличить количество голосов у проекта.
-     *
-     * @param projectId ID проекта.
-     * @param voteCount Количество голосов для увеличения.
-     */
-    public void increaseVoteCount(Long projectId, int voteCount) {
-        Project project = projectRepository.findById(projectId).orElse(null);
-
-        if (project != null) {
-            int updatedVoteCount = project.getVoteCount() + voteCount;
-            project.setVoteCount(updatedVoteCount);
-            projectRepository.save(project);
-        }
-    }
-    /**
      * Редактировать проект, если студент является тимлидом и это его проект.
      *
      * @param studentId ID студента.
@@ -96,7 +77,7 @@ public class ProjectService {
             return null;
         }
 
-        if (!"Team Leader".equalsIgnoreCase(student.getRoleInProject())) {
+        if (ProjectRole.TEAM_LEAD.getRole().equalsIgnoreCase(student.getRoleInProject().getRole())) {
             return null;
         }
 
@@ -116,30 +97,66 @@ public class ProjectService {
      */
     public List<Project> filterProjectsByCategoryAndSubcategory(String category, String subcategory) {
         log.info("Filtering projects by category and subcategory: {}, {}", category, subcategory);
-        return projectRepository.findByCategoryAndSubcategory(category, subcategory);
-    }
 
+        List<Project> projects = projectRepository.findByCategoryAndSubcategory(category, subcategory);
+
+        return projects;
+    }
     /**
-     * Загрузить архив проекта в базу данных.
+     * Загружает архив проекта в базу данных.
      *
-     * @param projectId ID проекта, в который загружается архив.
-     * @param archiveData Данные архива в виде массива байт.
-     * @return Обновленный объект проекта или null в случае ошибки.
+     * @param projectId       Идентификатор проекта, для которого загружается архив.
+     * @param archiveResource Ресурс архива проекта.
+     * @return Объект проекта с обновленным архивом, либо null в случае ошибки загрузки.
      */
-    public Project uploadProjectArchive(Long projectId, byte[] archiveData) {
+    public Project uploadProjectArchive(Long projectId, Resource archiveResource) {
         Project project = projectRepository.findById(projectId).orElse(null);
 
         if (project != null) {
             try {
-                project.setProjectArchive(archiveData);
-                projectRepository.save(project);
-                log.info("Uploaded archive for project with ID: {}", projectId);
-                return project;
+                if (archiveResource.contentLength() > 0) {
+                    project.setProjectArchive(archiveResource);
+
+                    projectRepository.save(project);
+                    log.info("Uploaded archive for project with ID: {}", projectId);
+                    return project;
+                }
             } catch (Exception e) {
                 log.error("Error while uploading project archive: {}", e.getMessage());
             }
         }
 
         return null;
+    }
+
+    /**
+     * Осуществляет голосование студента за определенный проект.
+     * @param studentId ID студента, голосующего за проект.
+     * @param projectId ID проекта, за который проходит голосование.
+     * @return {@code true}, если голосование выполнено успешно; в противном случае - {@code false}.
+     */
+    public boolean voteForProject(Long studentId, Long projectId) {
+        Student student = studentRepository.findById(studentId).orElse(null);
+        Project project = projectRepository.findById(projectId).orElse(null);
+
+        if (student != null && project != null && student.getVoteCount() >= 5) {
+            if (student.getVotedProjects().size() < 3 && !student.getVotedProjects().contains(project)) {
+                project.setVoteCount(project.getVoteCount() + 5);
+                student.setVoteCount(student.getVoteCount() - 5);
+
+                List<Project> projectVotes = student.getVotedProjects();
+                projectVotes.add(project);
+                student.setVotedProjects(projectVotes);
+                studentRepository.save(student);
+
+                List<Student> voters = project.getVoters();
+                voters.add(student);
+                project.setVoters(voters);
+                projectRepository.save(project);
+
+                return true;
+            }
+        }
+        return false;
     }
 }
