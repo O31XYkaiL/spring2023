@@ -1,5 +1,6 @@
 package com.webagregator.webagregator.testsDomain;
 
+import com.webagregator.webagregator.domain.ProjectRole;
 import com.webagregator.webagregator.domain.Student;
 import com.webagregator.webagregator.domain.Team;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ public class TeamTest {
         Team team = new Team();
         Student teamLeader = new Student();
         teamLeader.setId(1L);
-        team.setTeamLeader(teamLeader);
+        team.setTeamLead(ProjectRole.TEAM_LEAD);
 
-        assertEquals(teamLeader, team.getTeamLeader());
+        assertEquals(ProjectRole.TEAM_LEAD, team.getTeamLead());
     }
 
     @Test

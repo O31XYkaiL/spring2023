@@ -1,5 +1,6 @@
 package com.webagregator.webagregator.testsApp;
 
+import com.webagregator.webagregator.domain.ProjectRole;
 import com.webagregator.webagregator.app.repositories.ProjectRepository;
 import com.webagregator.webagregator.app.repositories.StudentRepository;
 import com.webagregator.webagregator.app.services.ProjectService;
@@ -97,7 +98,7 @@ public class ProjectServiceTests {
 
         Student student = new Student();
         student.setId(studentId);
-        student.setRoleInProject("Student");
+        student.setRoleInProject(ProjectRole.DESIGNER);
 
         Project project = new Project();
         project.setId(projectId);
@@ -112,7 +113,9 @@ public class ProjectServiceTests {
 
         Project result = projectService.editProjectByTeamLeader(studentId, projectId, updatedProject);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals("Updated Project", result.getProjectName());
+        assertEquals("Updated Description", result.getProjectDescription());
     }
 
     @Test
@@ -122,7 +125,7 @@ public class ProjectServiceTests {
 
         Student student = new Student();
         student.setId(studentId);
-        student.setRoleInProject("Team Leader");
+        student.setRoleInProject(ProjectRole.DESIGNER);
 
         Project project = new Project();
         project.setId(projectId);

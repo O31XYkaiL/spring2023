@@ -5,12 +5,15 @@ import com.webagregator.webagregator.app.repositories.TeamRepository;
 import com.webagregator.webagregator.app.services.TeamService;
 import com.webagregator.webagregator.domain.Student;
 import com.webagregator.webagregator.domain.Team;
+import com.webagregator.webagregator.domain.ProjectRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -86,26 +89,26 @@ public class TeamServiceTests {
     @Test
     public void testGetTeamLeaderByTeamId() {
         Long teamId = 1L;
+        ProjectRole teamLeadRole = ProjectRole.TEAM_LEAD;
+
         Team team = new Team();
-        Student teamLeader = new Student();
-        teamLeader.setRoleInProject("Team Leader");
-        team.setTeamLeader(teamLeader);
+        team.setTeamLead(teamLeadRole);
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.of(team));
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
 
-        Student result = teamService.getTeamLeaderByTeamId(teamId);
+        ProjectRole result = teamService.getTeamLeaderByTeamId(teamId);
 
         assertNotNull(result);
-        assertEquals("Team Leader", result.getRoleInProject());
+        assertEquals(teamLeadRole, result);
     }
 
     @Test
     public void testGetTeamLeaderByTeamId_WhenTeamNotFound() {
         Long teamId = 1L;
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.empty());
+        when(teamRepository.findById(teamId)).thenReturn(Optional.empty());
 
-        Student result = teamService.getTeamLeaderByTeamId(teamId);
+        ProjectRole result = teamService.getTeamLeaderByTeamId(teamId);
 
         assertNull(result);
     }
@@ -114,22 +117,22 @@ public class TeamServiceTests {
     public void testAddStudentToTeamWithRole() {
         Long teamId = 1L;
         Team team = new Team();
-        Student teamLeader = new Student();
-        teamLeader.setRoleInProject("Team Leader");
-        team.setTeamLeader(teamLeader);
+        ProjectRole teamLeadRole = ProjectRole.TEAM_LEAD;
+        team.setTeamLead(teamLeadRole);
 
         Student studentToAdd = new Student();
         studentToAdd.setId(2L);
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.of(team));
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(studentRepository.findStudentByLastNameAndFirstName("Doe", "John")).thenReturn(studentToAdd);
 
-        Team updatedTeam = teamService.addStudentToTeamWithRole(teamId, "Doe", "John", "Member");
+        Team updatedTeam = teamService.addStudentToTeamWithRole(teamId, "Doe", "John", ProjectRole.DESIGNER.name());
 
         assertNotNull(updatedTeam);
         assertTrue(updatedTeam.getTeamMembers().contains(studentToAdd));
-        assertEquals("Member", studentToAdd.getRoleInProject());
+        assertEquals(ProjectRole.DESIGNER, studentToAdd.getRoleInProject());
     }
+
 
     @Test
     public void testAddStudentToTeamWithRole_WhenTeamNotFound() {
@@ -146,11 +149,10 @@ public class TeamServiceTests {
     public void testAddStudentToTeamWithRole_WhenTeamLeaderCannotAdd() {
         Long teamId = 1L;
         Team team = new Team();
-        Student teamLeader = new Student();
-        teamLeader.setRoleInProject("Member");
-        team.setTeamLeader(teamLeader);
+        ProjectRole teamLeaderRole = ProjectRole.TEAM_LEAD;
+        team.setTeamLead(teamLeaderRole);
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.of(team));
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
 
         Team updatedTeam = teamService.addStudentToTeamWithRole(teamId, "Doe", "John", "Member");
 
@@ -161,11 +163,10 @@ public class TeamServiceTests {
     public void testAddStudentToTeamWithRole_WhenStudentNotFound() {
         Long teamId = 1L;
         Team team = new Team();
-        Student teamLeader = new Student();
-        teamLeader.setRoleInProject("Team Leader");
-        team.setTeamLeader(teamLeader);
+        ProjectRole teamLeaderRole = ProjectRole.TEAM_LEAD;
+        team.setTeamLead(teamLeaderRole);
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.of(team));
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(studentRepository.findStudentByLastNameAndFirstName("Doe", "John")).thenReturn(null);
 
         Team updatedTeam = teamService.addStudentToTeamWithRole(teamId, "Doe", "John", "Member");
@@ -177,14 +178,13 @@ public class TeamServiceTests {
     public void testAddStudentToTeamWithRole_WhenStudentIsTeamLeader() {
         Long teamId = 1L;
         Team team = new Team();
-        Student teamLeader = new Student();
-        teamLeader.setRoleInProject("Team Leader");
-        team.setTeamLeader(teamLeader);
+        ProjectRole teamLeaderRole = ProjectRole.TEAM_LEAD;
+        team.setTeamLead(teamLeaderRole);
 
         Student studentToAdd = new Student();
-        studentToAdd.setRoleInProject("Team Leader");
+        studentToAdd.setRoleInProject(ProjectRole.TEAM_LEAD);
 
-        when(teamRepository.findById(teamId)).thenReturn(java.util.Optional.of(team));
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(team));
         when(studentRepository.findStudentByLastNameAndFirstName("Doe", "John")).thenReturn(studentToAdd);
 
         Team updatedTeam = teamService.addStudentToTeamWithRole(teamId, "Doe", "John", "Member");

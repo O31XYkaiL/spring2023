@@ -2,7 +2,9 @@ package com.webagregator.webagregator.domain;
 
 public enum ProjectRole {
     TEAM_LEAD("TeamLead"),
-    BACKEND("Backend");
+    BACKEND("Backend"),
+    DESIGNER("Designer"),
+    SCIENTIST("Scientist");
     // другие роли
 
     private final String role;

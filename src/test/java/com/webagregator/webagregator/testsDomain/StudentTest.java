@@ -1,6 +1,7 @@
 package com.webagregator.webagregator.testsDomain;
 
 import com.webagregator.webagregator.domain.Student;
+import com.webagregator.webagregator.domain.ProjectRole;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,8 +67,8 @@ public class StudentTest {
     @Test
     public void testRoleInProject() {
         Student student = new Student();
-        student.setRoleInProject("Team Member");
+        student.setRoleInProject(ProjectRole.SCIENTIST);
 
-        assertEquals("Team Member", student.getRoleInProject());
+        assertEquals(ProjectRole.SCIENTIST, student.getRoleInProject());
     }
 }

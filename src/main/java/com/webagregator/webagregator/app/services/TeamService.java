@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Сервис, обеспечивающий работу с командами и их членами.
+ */
 @Slf4j
 @Service
 public class TeamService {
@@ -61,19 +64,21 @@ public class TeamService {
         log.info("Deleting team by ID: {}", id);
         teamRepository.deleteById(id);
     }
+
     /**
      * Получить тимлида команды по его ID.
      *
      * @param teamId ID команды.
      * @return Объект студента, являющегося тимлидом команды, или null, если команда не найдена или тимлид не установлен.
      */
-    public Student getTeamLeaderByTeamId(Long teamId) {
+    public ProjectRole getTeamLeaderByTeamId(Long teamId) {
         Team team = teamRepository.findById(teamId).orElse(null);
         if (team != null) {
-            return team.getTeamLeader();
+            return team.getTeamLead();
         }
         return null;
     }
+
     /**
      * Добавить студента в команду и назначить ему роль (не тимлида).
      *
@@ -86,13 +91,13 @@ public class TeamService {
     public Team addStudentToTeamWithRole(Long teamId, String lastName, String firstName, String role) {
         Team team = teamRepository.findById(teamId).orElse(null);
 
-        if (team == null || !ProjectRole.TEAM_LEAD.equals(team.getTeamLeader().getRoleInProject())) {
+        if (team == null || !ProjectRole.TEAM_LEAD.equals(team.getTeamLead())) {
             return null;
         }
 
         Student studentToAdd = studentRepository.findStudentByLastNameAndFirstName(lastName, firstName);
-        if (studentToAdd == null || ProjectRole.TEAM_LEAD.equals(studentToAdd.getRoleInProject())) {
 
+        if (studentToAdd == null || ProjectRole.TEAM_LEAD.equals(studentToAdd.getRoleInProject())) {
             return null;
         }
 

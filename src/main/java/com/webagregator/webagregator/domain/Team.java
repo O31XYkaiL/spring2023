@@ -3,6 +3,7 @@ package com.webagregator.webagregator.domain;
 import jakarta.persistence.OneToMany;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -22,11 +23,14 @@ public class Team {
     /**
      * Студент-тимлид
      */
-    private Student teamLeader;
+    private ProjectRole teamLead;
     /**
      * Список студентов, являющихся членами данной команды.
      */
     @Getter
     @OneToMany(mappedBy = "team")
     private List<Student> teamMembers;
+    public Team() {
+        this.teamMembers = new ArrayList<>();
+    }
 }
