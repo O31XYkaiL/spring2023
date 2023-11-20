@@ -10,18 +10,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ProjectServiceTests {
 
@@ -70,7 +74,7 @@ public class ProjectServiceTests {
 
         projectService.createProject(project);
 
-        Mockito.verify(projectRepository).save(project);
+        verify(projectRepository).save(project);
     }
 
     @Test
@@ -79,7 +83,7 @@ public class ProjectServiceTests {
 
         projectService.updateProject(project);
 
-        Mockito.verify(projectRepository).save(project);
+        verify(projectRepository).save(project);
     }
 
     @Test
@@ -88,7 +92,7 @@ public class ProjectServiceTests {
 
         projectService.deleteProject(projectId);
 
-        Mockito.verify(projectRepository).deleteById(projectId);
+        verify(projectRepository).deleteById(projectId);
     }
 
     @Test
@@ -143,10 +147,9 @@ public class ProjectServiceTests {
         assertNotNull(result);
         assertEquals("Updated Project", result.getProjectName());
         assertEquals("Updated Description", result.getProjectDescription());
-        Mockito.verify(projectRepository).save(project);
+        verify(projectRepository).save(project);
     }
 
-    //тест действительно не работал, он был неверным
     @Test
     public void testFilterProjectsByCategoryAndSubcategory() {
         String category = "CategoryName";
@@ -172,28 +175,50 @@ public class ProjectServiceTests {
     }
 
     @Test
-    void testUploadProjectArchive() {
-        ProjectRepository projectRepository = mock(ProjectRepository.class);
-        ProjectService projectService = new ProjectService(projectRepository, studentRepository);
-
+    public void testUploadProjectArchive() throws IOException {
         Long projectId = 1L;
-        byte[] archiveData = {1, 2, 3, 4};
-        Resource resource = new ByteArrayResource(archiveData);
-
         Project project = new Project();
-        when(projectRepository.findById(projectId)).thenReturn(java.util.Optional.of(project));
-        when(projectRepository.save(project)).thenReturn(project);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
 
-        Project result = projectService.uploadProjectArchive(projectId, resource);
+        String tempDirPath = "C:\\Users\\koziy\\IdeaProjects\\spring2023\\src\\projects";
+        String tempExtractedDirPath = tempDirPath + "\\" + UUID.randomUUID();
+        Files.createDirectories(Path.of(tempExtractedDirPath));
+
+        Path tempArchivePath = Files.createTempFile("test", ".zip");
+        createTestZipFile(tempExtractedDirPath, tempArchivePath);
+
+        MultipartFile mockMultipartFile = createMockMultipartFile(tempArchivePath);
+
+        Project result = projectService.uploadProjectArchive(projectId, mockMultipartFile);
+
+        verify(projectRepository, times(1)).save(project);
 
         assertNotNull(result);
-        byte[] resultData = new byte[archiveData.length];
-        try {
-            result.getProjectArchive().getInputStream().read(resultData);
-        } catch (Exception e) {
-            fail("Error reading the project archive");
+        assertNotNull(result.getProjectArchivePath());
+
+        assertTrue(result.getProjectArchivePath().startsWith(tempDirPath));}
+
+    private void createTestZipFile(String sourceDir, Path destination) throws IOException {
+        try (ZipOutputStream zipOut = new ZipOutputStream(Files.newOutputStream(destination))) {
+            Path sourcePath = Path.of(sourceDir);
+            Files.walk(sourcePath)
+                    .filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        ZipEntry zipEntry = new ZipEntry(sourcePath.relativize(path).toString());
+                        try {
+                            zipOut.putNextEntry(zipEntry);
+                            Files.copy(path, zipOut);
+                            zipOut.closeEntry();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
         }
-        assertArrayEquals(archiveData, resultData);
+    }
+
+    private MultipartFile createMockMultipartFile(Path file) throws IOException {
+        byte[] fileContent = Files.readAllBytes(file);
+        return new MockMultipartFile("file", file.getFileName().toString(), "application/zip", fileContent);
     }
 
     @Test
@@ -218,5 +243,71 @@ public class ProjectServiceTests {
         assertEquals(5, project.getVoteCount());
         assertEquals(1, student.getVotedProjects().size());
         assertEquals(1, project.getVoters().size());
+    }
+
+    @Test
+    void uploadProjectCoverImage_Success() throws IOException {
+        Long projectId = 1L;
+        byte[] imageData = "Test image data".getBytes();
+        MockMultipartFile coverImage = new MockMultipartFile("coverImage", "test.jpg", "image/jpeg", imageData);
+
+        Project project = new Project();
+        project.setId(projectId);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Path tempDir = Files.createTempDirectory("test-images");
+
+        Project resultProject = projectService.uploadProjectCoverImage(projectId, coverImage);
+
+        assertNotNull(resultProject);
+        assertEquals(projectId, resultProject.getId());
+        assertTrue(Files.exists(Path.of(resultProject.getCoverImage())));
+    }
+
+    @Test
+    void uploadProjectCoverImage_NullProject() {
+        Long projectId = 1L;
+        byte[] imageData = "Test image data".getBytes();
+        MockMultipartFile coverImage = new MockMultipartFile("coverImage", "test.jpg", "image/jpeg", imageData);
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        Project resultProject = projectService.uploadProjectCoverImage(projectId, coverImage);
+
+        assertNull(resultProject);
+    }
+
+    @Test
+    void uploadGameplayVideo_Success() throws IOException {
+        Long projectId = 1L;
+        byte[] videoData = "Test video data".getBytes();
+        MockMultipartFile gameplayVideo = new MockMultipartFile("gameplayVideo", "test.mp4", "video/mp4", videoData);
+
+        Project project = new Project();
+        project.setId(projectId);
+        when(projectRepository.findById(projectId)).thenReturn(Optional.of(project));
+
+        Path tempDir = Files.createTempDirectory("test-videos");
+
+        Project resultProject = projectService.uploadGameplayVideo(projectId, gameplayVideo);
+
+        assertNotNull(resultProject);
+        assertEquals(projectId, resultProject.getId());
+        assertTrue(Files.exists(Path.of(resultProject.getGameplayVideo())));
+
+        Files.deleteIfExists(tempDir);
+    }
+
+    @Test
+    void uploadGameplayVideo_NullProject() {
+        Long projectId = 1L;
+        byte[] videoData = "Test video data".getBytes();
+        MockMultipartFile gameplayVideo = new MockMultipartFile("gameplayVideo", "test.mp4", "video/mp4", videoData);
+
+        when(projectRepository.findById(projectId)).thenReturn(Optional.empty());
+
+        Project resultProject = projectService.uploadGameplayVideo(projectId, gameplayVideo);
+
+        assertNull(resultProject);
     }
 }

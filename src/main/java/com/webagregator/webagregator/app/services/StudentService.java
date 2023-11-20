@@ -10,13 +10,20 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class StudentService {
+    /**
+     * Репозиторий студента
+     */
     private final StudentRepository studentRepository;
-    private final ProjectService projectService;
 
+    /**
+     * Конструктор сервиса.
+     *
+     * @param studentRepository Репозиторий студентов.
+     */
     @Autowired
-    public StudentService(StudentRepository studentRepository, ProjectRepository projectRepository, ProjectService projectService) {
+    public StudentService(StudentRepository studentRepository)
+    {
         this.studentRepository = studentRepository;
-        this.projectService = projectService;
     }
 
     /**

@@ -27,10 +27,6 @@ public class Team {
     /**
      * Список студентов, являющихся членами данной команды.
      */
-    @Getter
     @OneToMany(mappedBy = "team")
-    private List<Student> teamMembers;
-    public Team() {
-        this.teamMembers = new ArrayList<>();
-    }
+    private List<Student> teamMembers = new ArrayList<>();
 }

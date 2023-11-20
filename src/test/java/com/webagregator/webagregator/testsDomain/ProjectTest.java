@@ -79,28 +79,13 @@ public class ProjectTest {
     }
 
     @Test
-    public void testProjectArchive() {
-        byte[] archiveBytes = new byte[]{1, 2, 3};
-        Resource archiveResource = new ByteArrayResource(archiveBytes);
-
+    public void testProjectArchivePath() {
+        String archivePath = "path/to/archive.zip";
         Project project = new Project();
-        project.setProjectArchive(archiveResource);
+        project.setProjectArchivePath(archivePath);
 
-        assertNotNull(project.getProjectArchive());
-        byte[] readData = readBytesFromResource(project.getProjectArchive());
-
-        assertArrayEquals(archiveBytes, readData);
-    }
-
-    //я догадываюсь, что в тестовых классах не должно лежать ничего, кроме тестов, я пока не разобралась с разархивацией до конца
-    private byte[] readBytesFromResource(Resource resource) {
-        byte[] data = null;
-        try {
-            data = FileCopyUtils.copyToByteArray(resource.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return data;
+        assertNotNull(project.getProjectArchivePath());
+        assertEquals(archivePath, project.getProjectArchivePath());
     }
 
     @Test

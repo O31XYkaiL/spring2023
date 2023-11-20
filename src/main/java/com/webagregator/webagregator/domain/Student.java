@@ -42,12 +42,5 @@ public class Student {
     /**
      * Проекты, за которые проголосовал студент
      */
-    List<Project> votedProjects;
-
-    /**
-     * Инициализация списка
-     */
-    public Student() {
-        this.votedProjects = new ArrayList<>();
-    }
+    private List<Project> votedProjects = new ArrayList<>();
 }
